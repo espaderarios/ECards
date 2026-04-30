@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+opencv-python
+pytesseract
+spacy
+requests
+python-multipart
+aiofiles
+numpy
