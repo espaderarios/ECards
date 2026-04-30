@@ -625,7 +625,7 @@
   <div class="tabs"><button class="tab active" id="studyTab">Study</button> <button class="tab" id="quizTab">Quiz</button> <button class="tab" id="ocrTab">OCR</button>
    </div>
   <div id="ocrMode" style="display:none;">
-   <div class="drawer-section"><label for="ocrImageInput">Import Image (OCR)</label> <input type="file" id="ocrImageInput" accept="image/*"></div>
+   <div class="drawer-section"><label for="ocrImageInput">Import Image (OCR)</label> <input type="file" id="ocrImageInput" accept="image"></div>
    <div class="drawer-section"><label for="ocrTextArea">Extracted Text (edit as needed)</label> <textarea id="ocrTextArea" style="min-height:120px;"></textarea></div>
    <div class="button-group"><button class="btn-primary" id="ocrToFlashcard">Create Flashcard</button></div>
    <div class="helper-text">Upload an image, edit the extracted text, then create a flashcard.</div>
@@ -1115,11 +1115,18 @@
         elements.ocrMode.style.display = 'block';
       }
     }
-    elements.studyTab.addEventListener('click', () => setTab('study'));
-    elements.quizTab.addEventListener('click', () => setTab('quiz'));
-    elements.ocrTab.addEventListener('click', () => setTab('ocr'));
+    // Defensive: Check all required elements before adding listeners
+    const requiredElementKeys = ['studyTab', 'quizTab', 'ocrTab', 'ocrImageInput', 'ocrTextArea', 'ocrToFlashcard'];
+    for (const key of requiredElementKeys) {
+      if (!elements[key]) {
+        console.error(`Element '${key}' is undefined. Check your HTML IDs.`);
+      }
+    }
+    if (elements.studyTab) elements.studyTab.addEventListener('click', () => setTab('study'));
+    if (elements.quizTab) elements.quizTab.addEventListener('click', () => setTab('quiz'));
+    if (elements.ocrTab) elements.ocrTab.addEventListener('click', () => setTab('ocr'));
     // OCR tab logic
-    elements.ocrImageInput.addEventListener('change', async (e) => {
+    if (elements.ocrImageInput) elements.ocrImageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const formData = new FormData();
@@ -1143,7 +1150,7 @@
       }
       e.target.value = '';
     });
-    elements.ocrToFlashcard.addEventListener('click', () => {
+    if (elements.ocrToFlashcard) elements.ocrToFlashcard.addEventListener('click', () => {
       const text = elements.ocrTextArea.value.trim();
       if (!text) {
         alert('No text to create flashcard');
