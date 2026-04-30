@@ -956,7 +956,7 @@
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch('https://ecards-haz2.onrender.com/api/upload', {
           method: 'POST',
           body: formData
         });
@@ -1124,7 +1124,7 @@
       const formData = new FormData();
       formData.append('file', file);
       try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch('https://ecards-haz2.onrender.com/api/upload', {
           method: 'POST',
           body: formData
         });
