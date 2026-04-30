@@ -16,11 +16,11 @@ app = FastAPI()
 
 # Enable CORS for all origins (adjust for production)
 app.add_middleware(
-  CORSMiddleware,
-  allow_origins=["*"],
-  allow_credentials=True,
-  allow_methods=["*"],
-  allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["https://riosweb.tech"],  # Only allow your frontend domain
+    allow_credentials=False,  # Set to True only if you need cookies/auth headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Serve static docs (was frontend)
