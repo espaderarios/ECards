@@ -7,7 +7,6 @@
 <link rel="manifest" href="manifest.json">
 
    <script>
-     // ===================== ELEMENT SDK ===================== //
 
 (function () {
 
@@ -15,16 +14,14 @@
     config: {},
 
     init({ defaultConfig, onConfigChange, mapToCapabilities, mapToEditPanelValues }) {
-      // Load config from dataSdk or fallback
       const saved = window.dataSdk ? window.dataSdk.loadConfig() : null;
       this.config = saved || defaultConfig;
 
-      // Expose callbacks
       this.onConfigChange = onConfigChange;
       this.mapToCapabilities = mapToCapabilities;
       this.mapToEditPanelValues = mapToEditPanelValues;
 
-      // Inform the UI to update
+      
       onConfigChange(this.config);
     },
 
@@ -553,7 +550,7 @@
   </style>
   <style>@view-transition { navigation: auto; }</style>
    <script>
-     // ===================== DATA SDK ===================== //
+    
 
 (function () {
   const STORAGE_KEY = "flash_app_storage_v1";
@@ -625,7 +622,7 @@
   <div class="tabs"><button class="tab active" id="studyTab">Study</button> <button class="tab" id="quizTab">Quiz</button> <button class="tab" id="ocrTab">OCR</button>
    </div>
   <div id="ocrMode" style="display:none;">
-   <div class="drawer-section"><label for="ocrImageInput">Import Image (OCR)</label> <input type="file" id="ocrImageInput" accept="image"></div>
+   <div class="drawer-section"><label for="ocrImageInput">Import Image (OCR)</label> <input type="file" id="ocrImageInput" accept="image/*"></div>
    <div class="drawer-section"><label for="ocrTextArea">Extracted Text (edit as needed)</label> <textarea id="ocrTextArea" style="min-height:120px;"></textarea></div>
    <div class="button-group"><button class="btn-primary" id="ocrToFlashcard">Create Flashcard</button></div>
    <div class="helper-text">Upload an image, edit the extracted text, then create a flashcard.</div>
@@ -736,28 +733,38 @@
     let currentAnswer = null;
 
     const elements = {
-      card: document.getElementById('card'),
-      frontFace: document.getElementById('frontFace'),
-      backFace: document.getElementById('backFace'),
-      deckName: document.getElementById('deckName'),
-      position: document.getElementById('position'),
-      stats: document.getElementById('stats'),
-      appTitle: document.getElementById('appTitle'),
-      footerText: document.getElementById('footerText'),
-      menuToggle: document.getElementById('menuToggle'),
-      overlay: document.getElementById('overlay'),
-      drawer: document.getElementById('drawer'),
-      closeDrawer: document.getElementById('closeDrawer'),
-      fileInput: document.getElementById('fileInput'),
-      pasteJson: document.getElementById('pasteJson'),
-      urlInput: document.getElementById('urlInput'),
-      searchInput: document.getElementById('searchInput'),
-      ocrTab: document.getElementById('ocrTab'),
-      ocrMode: document.getElementById('ocrMode'),
-      ocrImageInput: document.getElementById('ocrImageInput'),
-      ocrTextArea: document.getElementById('ocrTextArea'),
-      ocrToFlashcard: document.getElementById('ocrToFlashcard')
-    };
+  card: document.getElementById('card'),
+  studyTab: document.getElementById('studyTab'),
+  quizTab: document.getElementById('quizTab'),
+  ocrTab: document.getElementById('ocrTab'),
+
+  studyMode: document.getElementById('studyMode'),
+  quizMode: document.getElementById('quizMode'),
+  ocrMode: document.getElementById('ocrMode'),
+
+  frontFace: document.getElementById('frontFace'),
+  backFace: document.getElementById('backFace'),
+  deckName: document.getElementById('deckName'),
+  position: document.getElementById('position'),
+  stats: document.getElementById('stats'),
+
+  appTitle: document.getElementById('appTitle'),
+  footerText: document.getElementById('footerText'),
+
+  menuToggle: document.getElementById('menuToggle'),
+  overlay: document.getElementById('overlay'),
+  drawer: document.getElementById('drawer'),
+  closeDrawer: document.getElementById('closeDrawer'),
+
+  fileInput: document.getElementById('fileInput'),
+  pasteJson: document.getElementById('pasteJson'),
+  urlInput: document.getElementById('urlInput'),
+  searchInput: document.getElementById('searchInput'),
+
+  ocrImageInput: document.getElementById('ocrImageInput'),
+  ocrTextArea: document.getElementById('ocrTextArea'),
+  ocrToFlashcard: document.getElementById('ocrToFlashcard')
+};
 
     function updateUI() {
       elements.appTitle.textContent = config.app_title || defaultConfig.app_title;
@@ -783,93 +790,106 @@
     }
 
     function generateQuiz() {
-      if (deck.length < 2) {
-        document.getElementById('quizQuestion').textContent = 'Need at least 2 cards to create a quiz';
-        return;
-      }
-      
-      quizDeck = [...deck].sort(() => Math.random() - 0.5);
-      quizIndex = 0;
-      quizScore = 0;
-      document.getElementById('quizResults').style.display = 'none';
-      showQuizQuestion();
-    }
+  if (!deck || deck.length < 2) {
+    document.getElementById('quizQuestion').textContent =
+      'Need at least 2 cards to create a quiz';
+    return;
+  }
 
-    function showQuizQuestion() {
-      if (quizIndex >= quizDeck.length) {
-        showQuizResults();
-        return;
-      }
+  quizDeck = [...deck].sort(() => Math.random() - 0.5);
+  quizIndex = 0;
+  quizScore = 0;
+  currentAnswer = null;
 
-      const question = quizDeck[quizIndex];
-      currentAnswer = question.back;
-      
-      document.getElementById('quizQuestion').textContent = question.front;
-      document.getElementById('quizFeedback').style.display = 'none';
-      document.getElementById('nextQuizBtn').style.display = 'none';
-      
-      // Generate options: correct answer + 3 random wrong answers
-      const options = [question.back];
-      const otherCards = deck.filter(c => c.back !== question.back);
-      
-      while (options.length < 4 && otherCards.length > 0) {
-        const randomIndex = Math.floor(Math.random() * otherCards.length);
-        const wrongAnswer = otherCards[randomIndex].back;
-        if (!options.includes(wrongAnswer)) {
-          options.push(wrongAnswer);
-        }
-        otherCards.splice(randomIndex, 1);
-      }
-      
-      // Shuffle options
-      options.sort(() => Math.random() - 0.5);
-      
-      // Render options
-      const optionsContainer = document.getElementById('quizOptions');
-      optionsContainer.innerHTML = '';
-      
-      options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.className = 'quiz-option';
-        btn.textContent = option;
-        btn.addEventListener('click', () => checkAnswer(option, btn));
-        optionsContainer.appendChild(btn);
-      });
-    }
+  // reset UI cleanly
+  document.getElementById('quizResults').style.display = 'none';
+  document.querySelector('.quiz-card').style.display = 'block';
+  document.getElementById('quizFeedback').style.display = 'none';
+  document.getElementById('nextQuizBtn').style.display = 'none';
 
-    function checkAnswer(selectedAnswer, selectedButton) {
-      const isCorrect = selectedAnswer === currentAnswer;
-      
-      if (isCorrect) {
-        quizScore++;
-        selectedButton.classList.add('correct');
-        const feedback = document.getElementById('quizFeedback');
-        feedback.textContent = '✓ Correct!';
-        feedback.className = 'quiz-feedback correct';
-        feedback.style.display = 'block';
-      } else {
-        selectedButton.classList.add('incorrect');
-        const feedback = document.getElementById('quizFeedback');
-        feedback.textContent = `✗ Incorrect. The answer was: ${currentAnswer}`;
-        feedback.className = 'quiz-feedback incorrect';
-        feedback.style.display = 'block';
-        
-        // Highlight correct answer
-        document.querySelectorAll('.quiz-option').forEach(btn => {
-          if (btn.textContent === currentAnswer) {
-            btn.classList.add('correct');
-          }
-        });
+  showQuizQuestion();
+}
+  
+function showQuizQuestion() {
+  if (!quizDeck || quizIndex >= quizDeck.length) {
+    showQuizResults();
+    return;
+  }
+
+  const question = quizDeck[quizIndex];
+  if (!question) return;
+
+  currentAnswer = question.back;
+
+  document.getElementById('quizQuestion').textContent =
+    question.front || 'No question';
+
+  document.getElementById('quizFeedback').style.display = 'none';
+  document.getElementById('nextQuizBtn').style.display = 'none';
+
+  // build options safely
+  const options = new Set();
+  options.add(question.back || 'No answer');
+
+  const pool = deck.filter(c => c.back && c.back !== question.back);
+
+  while (options.size < 4 && pool.length > 0) {
+    const rand = Math.floor(Math.random() * pool.length);
+    options.add(pool[rand].back);
+    pool.splice(rand, 1);
+  }
+
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('quizOptions');
+  container.innerHTML = '';
+
+  shuffled.forEach(option => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = option;
+
+    btn.onclick = () => checkAnswer(option, btn);
+
+    container.appendChild(btn);
+  });
+
+  updateQuizProgress();
+}
+
+function checkAnswer(selectedAnswer, selectedButton) {
+  const buttons = document.querySelectorAll('.quiz-option');
+
+  // lock immediately
+  buttons.forEach(btn => btn.disabled = true);
+
+  const isCorrect = selectedAnswer === currentAnswer;
+
+  const feedback = document.getElementById('quizFeedback');
+
+  if (isCorrect) {
+    quizScore++;
+
+    selectedButton.classList.add('correct');
+
+    feedback.textContent = '✓ Correct!';
+    feedback.className = 'quiz-feedback correct';
+  } else {
+    selectedButton.classList.add('incorrect');
+
+    feedback.textContent = `✗ Incorrect. Answer: ${currentAnswer}`;
+    feedback.className = 'quiz-feedback incorrect';
+
+    buttons.forEach(btn => {
+      if (btn.textContent === currentAnswer) {
+        btn.classList.add('correct');
       }
-      
-      // Disable all options
-      document.querySelectorAll('.quiz-option').forEach(btn => {
-        btn.disabled = true;
-      });
-      
-      document.getElementById('nextQuizBtn').style.display = 'block';
-      updateQuizProgress();
-    }
+    });
+  }
+
+  feedback.style.display = 'block';
+  document.getElementById('nextQuizBtn').style.display = 'block';
+}
 
     function showQuizResults() {
       document.getElementById('quizResults').style.display = 'block';
@@ -948,8 +968,7 @@
       elements.drawer.classList.remove('active');
     }
 
-    // Event listeners
-    // Image import (OCR)
+    
     elements.imageInput = document.getElementById('imageInput');
     elements.imageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -1092,30 +1111,44 @@
     });
 
 
-    // Tab switching
-    function setTab(tab) {
-      currentMode = tab;
-      elements.studyTab.classList.remove('active');
-      elements.quizTab.classList.remove('active');
-      elements.ocrTab.classList.remove('active');
-      elements.studyMode.style.display = 'none';
-      elements.quizMode.style.display = 'none';
-      elements.ocrMode.style.display = 'none';
-      if (tab === 'study') {
-        elements.studyTab.classList.add('active');
-        elements.studyMode.style.display = 'block';
-        updateUI();
-      } else if (tab === 'quiz') {
-        elements.quizTab.classList.add('active');
-        elements.quizMode.style.display = 'block';
-        generateQuiz();
-        updateUI();
-      } else if (tab === 'ocr') {
-        elements.ocrTab.classList.add('active');
-        elements.ocrMode.style.display = 'block';
-      }
-    }
-    // Defensive: Check all required elements before adding listeners
+    
+function setTab(tab) {
+  currentMode = tab;
+
+  // reset active tab UI
+  elements.studyTab.classList.remove('active');
+  elements.quizTab.classList.remove('active');
+  elements.ocrTab.classList.remove('active');
+
+  // hide all modes safely
+  elements.studyMode.style.display = 'none';
+  elements.quizMode.style.display = 'none';
+  elements.ocrMode.style.display = 'none';
+
+  if (tab === 'study') {
+    elements.studyTab.classList.add('active');
+    elements.studyMode.style.display = 'block';
+
+    document.querySelector('.quiz-card').style.display = 'block';
+    updateUI();
+  }
+
+  else if (tab === 'quiz') {
+    elements.quizTab.classList.add('active');
+    elements.quizMode.style.display = 'block';
+
+    document.querySelector('.quiz-card').style.display = 'block';
+    document.getElementById('quizResults').style.display = 'none';
+
+    generateQuiz();
+  }
+
+  else if (tab === 'ocr') {
+    elements.ocrTab.classList.add('active');
+    elements.ocrMode.style.display = 'block';
+  }
+}
+   
     const requiredElementKeys = ['studyTab', 'quizTab', 'ocrTab', 'ocrImageInput', 'ocrTextArea', 'ocrToFlashcard'];
     for (const key of requiredElementKeys) {
       if (!elements[key]) {
@@ -1125,7 +1158,7 @@
     if (elements.studyTab) elements.studyTab.addEventListener('click', () => setTab('study'));
     if (elements.quizTab) elements.quizTab.addEventListener('click', () => setTab('quiz'));
     if (elements.ocrTab) elements.ocrTab.addEventListener('click', () => setTab('ocr'));
-    // OCR tab logic
+  
     if (elements.ocrImageInput) elements.ocrImageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1156,23 +1189,28 @@
         alert('No text to create flashcard');
         return;
       }
-      // Use the text as front, let back be empty for now
+     
       loadDeck([{ front: text, back: '' }]);
       setTab('study');
       alert('Flashcard created from OCR text!');
     });
 
-    document.getElementById('nextQuizBtn').addEventListener('click', () => {
-      quizIndex++;
-      document.querySelector('.quiz-card').style.display = 'block';
-      showQuizQuestion();
-    });
+document.getElementById('nextQuizBtn').addEventListener('click', () => {
+  quizIndex++;
+
+  document.getElementById('quizFeedback').style.display = 'none';
+  document.getElementById('nextQuizBtn').style.display = 'none';
+
+  document.querySelector('.quiz-card').style.display = 'block';
+
+  showQuizQuestion();
+});
 
     document.getElementById('restartQuiz').addEventListener('click', () => {
       generateQuiz();
     });
 
-    // Keyboard navigation
+    
     document.addEventListener('keydown', (e) => {
       if (currentMode === 'study') {
         if (e.key === 'ArrowRight') nextCard();
@@ -1184,7 +1222,7 @@
       }
     });
 
-    // Element SDK implementation
+    
     async function onConfigChange(newConfig) {
       config = { ...newConfig };
       updateUI();
@@ -1218,9 +1256,9 @@
       config = { ...window.elementSdk.config };
     }
 
-    // Initialize UI
+    
     updateUI();
-    }); // end DOMContentLoaded
+    }); 
   </script>
 <script>
   if ("serviceWorker" in navigator) {
