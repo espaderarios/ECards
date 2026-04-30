@@ -715,6 +715,7 @@
    </div>
   </div>
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
     const defaultConfig = {
       app_title: "Flashcards",
       empty_state_text: "Load a deck to begin",
@@ -1212,6 +1213,7 @@
 
     // Initialize UI
     updateUI();
+    }); // end DOMContentLoaded
   </script>
 <script>
   if ("serviceWorker" in navigator) {
