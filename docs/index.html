@@ -622,9 +622,15 @@
    <div class="header">
     <h1 id="appTitle">Flashcards</h1>
    </div>
-   <div class="tabs"><button class="tab active" id="studyTab">Study</button> <button class="tab" id="quizTab">Quiz</button>
+  <div class="tabs"><button class="tab active" id="studyTab">Study</button> <button class="tab" id="quizTab">Quiz</button> <button class="tab" id="ocrTab">OCR</button>
    </div>
-   <div class="deck-info">
+  <div id="ocrMode" style="display:none;">
+   <div class="drawer-section"><label for="ocrImageInput">Import Image (OCR)</label> <input type="file" id="ocrImageInput" accept="image/*"></div>
+   <div class="drawer-section"><label for="ocrTextArea">Extracted Text (edit as needed)</label> <textarea id="ocrTextArea" style="min-height:120px;"></textarea></div>
+   <div class="button-group"><button class="btn-primary" id="ocrToFlashcard">Create Flashcard</button></div>
+   <div class="helper-text">Upload an image, edit the extracted text, then create a flashcard.</div>
+  </div>
+  <div class="deck-info">
     <div class="deck-name" id="deckName">
      No deck loaded
     </div>
@@ -744,7 +750,12 @@
       fileInput: document.getElementById('fileInput'),
       pasteJson: document.getElementById('pasteJson'),
       urlInput: document.getElementById('urlInput'),
-      searchInput: document.getElementById('searchInput')
+      searchInput: document.getElementById('searchInput'),
+      ocrTab: document.getElementById('ocrTab'),
+      ocrMode: document.getElementById('ocrMode'),
+      ocrImageInput: document.getElementById('ocrImageInput'),
+      ocrTextArea: document.getElementById('ocrTextArea'),
+      ocrToFlashcard: document.getElementById('ocrToFlashcard')
     };
 
     function updateUI() {
@@ -1079,24 +1090,68 @@
       updateUI();
     });
 
-    // Tab switching
-    document.getElementById('studyTab').addEventListener('click', () => {
-      currentMode = 'study';
-      document.getElementById('studyTab').classList.add('active');
-      document.getElementById('quizTab').classList.remove('active');
-      document.getElementById('studyMode').style.display = 'block';
-      document.getElementById('quizMode').style.display = 'none';
-      updateUI();
-    });
 
-    document.getElementById('quizTab').addEventListener('click', () => {
-      currentMode = 'quiz';
-      document.getElementById('quizTab').classList.add('active');
-      document.getElementById('studyTab').classList.remove('active');
-      document.getElementById('studyMode').style.display = 'none';
-      document.getElementById('quizMode').style.display = 'block';
-      generateQuiz();
-      updateUI();
+    // Tab switching
+    function setTab(tab) {
+      currentMode = tab;
+      elements.studyTab.classList.remove('active');
+      elements.quizTab.classList.remove('active');
+      elements.ocrTab.classList.remove('active');
+      elements.studyMode.style.display = 'none';
+      elements.quizMode.style.display = 'none';
+      elements.ocrMode.style.display = 'none';
+      if (tab === 'study') {
+        elements.studyTab.classList.add('active');
+        elements.studyMode.style.display = 'block';
+        updateUI();
+      } else if (tab === 'quiz') {
+        elements.quizTab.classList.add('active');
+        elements.quizMode.style.display = 'block';
+        generateQuiz();
+        updateUI();
+      } else if (tab === 'ocr') {
+        elements.ocrTab.classList.add('active');
+        elements.ocrMode.style.display = 'block';
+      }
+    }
+    elements.studyTab.addEventListener('click', () => setTab('study'));
+    elements.quizTab.addEventListener('click', () => setTab('quiz'));
+    elements.ocrTab.addEventListener('click', () => setTab('ocr'));
+    // OCR tab logic
+    elements.ocrImageInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        const data = await response.json();
+        if (data && data.text) {
+          elements.ocrTextArea.value = data.text;
+        } else {
+          elements.ocrTextArea.value = '';
+          alert('No text extracted from image');
+        }
+      } catch (err) {
+        elements.ocrTextArea.value = '';
+        alert('Image upload or OCR failed');
+      }
+      e.target.value = '';
+    });
+    elements.ocrToFlashcard.addEventListener('click', () => {
+      const text = elements.ocrTextArea.value.trim();
+      if (!text) {
+        alert('No text to create flashcard');
+        return;
+      }
+      // Use the text as front, let back be empty for now
+      loadDeck([{ front: text, back: '' }]);
+      setTab('study');
+      alert('Flashcard created from OCR text!');
     });
 
     document.getElementById('nextQuizBtn').addEventListener('click', () => {
