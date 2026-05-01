@@ -436,7 +436,7 @@
     .ocr-box {
       background: rgba(27, 160, 152, 0.15);
       backdrop-filter: blur(10px);
-      padding: 16px;
+      padding: 24px;
       border-radius: 12px;
       margin-bottom: 16px;
       color: #2d5f5b;
@@ -480,13 +480,15 @@
     }
 
     .ocr-box textarea {
-      min-height: 140px;
+      min-height: 280px;
       resize: vertical;
     }
 
     #ocrPreview {
       display: none;
       max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
       border-radius: 12px;
       margin-top: 12px;
     }
@@ -726,13 +728,27 @@
 
     <!-- STEP 2: OCR Output -->
     <div class="ocr-box">
-      <label>🧠 Step 2: Extracted Text (edit as needed)</label>
+      <label style="font-size: 16px; font-weight: 700;">🧠 Step 2: Extracted Text (edit as needed)</label>
       <textarea id="ocrTextArea" placeholder="Image preview and extracted text will appear here..."></textarea>
+    </div>
+
+    <!-- STEP 2.5: Edit Flashcard Fields -->
+    <div id="ocrEditSection" style="display: none;">
+      <div class="ocr-box">
+        <label style="font-size: 16px; font-weight: 700;">❓ Question (Front)</label>
+        <input type="text" id="ocrFrontField" placeholder="Enter question here..." style="width: 100%; padding: 12px; border: 2px solid rgba(27, 160, 152, 0.3); border-radius: 8px; font-size: 15px; background: rgba(255,255,255,0.8); color: #2d5f5b; margin-bottom: 12px;">
+      </div>
+
+      <div class="ocr-box">
+        <label style="font-size: 16px; font-weight: 700;">💡 Answer (Back)</label>
+        <input type="text" id="ocrBackField" placeholder="Enter answer here..." style="width: 100%; padding: 12px; border: 2px solid rgba(27, 160, 152, 0.3); border-radius: 8px; font-size: 15px; background: rgba(255,255,255,0.8); color: #2d5f5b;">
+      </div>
     </div>
 
     <!-- STEP 3: Actions -->
     <div class="button-group">
       <button class="btn-primary" id="ocrProcessBtn">✨ Extract Text</button>
+      <button class="btn-ghost" id="ocrEditBtn" style="display: none;">✏️ Edit Fields</button>
       <button class="btn-ghost" id="ocrToFlashcard">⚡ Create Flashcards</button>
     </div>
     <div class="helper-text" style="color: rgba(255,255,255,0.8); text-align: center; margin-top: 12px;">
@@ -1352,7 +1368,9 @@ function setTab(tab) {
         if (extractedText) {
           elements.ocrTextArea.value = extractedText;
           statusText.textContent = '✅ Text extracted! Edit if needed, then create flashcards.';
+          document.getElementById('ocrEditBtn').style.display = 'inline-block';
         } else {
+          document.getElementById('ocrEditBtn').style.display = 'none';
           elements.ocrTextArea.value = '';
           elements.ocrTextArea.placeholder = '❌ No text found. Try a clearer image.';
           statusText.textContent = '❌ No text found in image';
@@ -1362,6 +1380,7 @@ function setTab(tab) {
         elements.ocrTextArea.value = '';
         elements.ocrTextArea.placeholder = '❌ OCR failed: ' + err.message;
         statusText.textContent = '❌ OCR processing failed';
+        document.getElementById('ocrEditBtn').style.display = 'none';
       } finally {
         processBtn.disabled = false;
         setTimeout(() => statusBox.classList.remove('show'), 3000);
@@ -1415,6 +1434,105 @@ document.getElementById('nextQuizBtn').addEventListener('click', () => {
 
     document.getElementById('restartQuiz').addEventListener('click', () => {
       generateQuiz();
+    });
+
+    // OCR: Edit Button - Toggle Edit Fields
+    const ocrEditBtn = document.getElementById('ocrEditBtn');
+    const ocrEditSection = document.getElementById('ocrEditSection');
+    const ocrFrontField = document.getElementById('ocrFrontField');
+    const ocrBackField = document.getElementById('ocrBackField');
+
+    ocrEditBtn.addEventListener('click', () => {
+      const isVisible = ocrEditSection.style.display !== 'none';
+      
+      if (!isVisible) {
+        // Show edit section and parse text
+        const text = elements.ocrTextArea.value.trim();
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+        
+        if (lines.length === 0) {
+          alert('❌ No text to edit.');
+          return;
+        }
+        
+        // Parse first line as question, rest as answer
+        const firstLine = lines[0].trim();
+        const questionMatch = firstLine.match(/^([^?]*\?)\s*(.*)/);
+        
+        if (questionMatch && questionMatch[1]) {
+          ocrFrontField.value = questionMatch[1].trim();
+          ocrBackField.value = (questionMatch[2] + (lines.length > 1 ? ' ' + lines.slice(1).join(' ') : '')).trim();
+        } else {
+          ocrFrontField.value = firstLine;
+          ocrBackField.value = lines.slice(1).join('\n').trim();
+        }
+        
+        ocrEditSection.style.display = 'block';
+        ocrEditBtn.textContent = '✓ Done Editing';
+      } else {
+        // Hide edit section
+        ocrEditSection.style.display = 'none';
+        ocrEditBtn.textContent = '✏️ Edit Fields';
+      }
+    });
+
+    // OCR: Create from edited fields
+    elements.ocrToFlashcard.addEventListener('click', () => {
+      const isEditing = ocrEditSection.style.display !== 'none';
+      
+      if (isEditing) {
+        // Use edited front/back fields
+        const front = ocrFrontField.value.trim();
+        const back = ocrBackField.value.trim();
+        
+        if (!front && !back) {
+          alert('❌ Please enter at least a question or answer.');
+          return;
+        }
+        
+        const card = { front: front || '', back: back || '' };
+        loadDeck([card]);
+        setTab('study');
+        alert('✨ Flashcard created!');
+        
+        // Reset
+        ocrEditSection.style.display = 'none';
+        ocrEditBtn.textContent = '✏️ Edit Fields';
+        ocrEditBtn.style.display = 'none';
+        elements.ocrTextArea.value = '';
+      } else {
+        // Use smart text parsing
+        const text = elements.ocrTextArea.value.trim();
+        if (!text) {
+          alert('❌ No text to create flashcards. Extract text first.');
+          return;
+        }
+
+        // Split by newlines and filter empty lines
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+
+        // Smart Q&A detection - if line contains '?' treat as Q&A format
+        const cards = lines.map(line => {
+          const trimmed = line.trim();
+          const questionMatch = trimmed.match(/^([^?]*\?)\s*(.*)/);
+          
+          if (questionMatch && questionMatch[1]) {
+            return {
+              front: questionMatch[1].trim(),
+              back: questionMatch[2]?.trim() || ''
+            };
+          }
+          
+          return {
+            front: trimmed,
+            back: ''
+          };
+        });
+
+        loadDeck(cards);
+        setTab('study');
+        alert(`✨ Created ${cards.length} flashcard${cards.length !== 1 ? 's' : ''} from OCR text!`);
+      }
     });
 
     
