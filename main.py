@@ -14,13 +14,21 @@ import os
 
 app = FastAPI()
 
-# Enable CORS for all origins (adjust for production)
+# Enable CORS - MUST be added first before other middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://riosweb.tech"],  # Only allow your frontend domain
-    allow_credentials=False,  # Set to True only if you need cookies/auth headers
+    allow_origins=[
+        "https://riosweb.tech",
+        "http://localhost:3000",  # Local development
+        "http://localhost:8000",  # Local backend
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 # Serve static docs (was frontend)
@@ -40,20 +48,58 @@ def root():
 # Upload image, return OCR, keywords, query, explanation, and flashcard JSON
 @app.post('/api/upload')
 async def upload_image(file: UploadFile = File(...)):
-  data = await file.read()
-  text = extract_text_from_bytes(data)
-  keywords = extract_keywords(text)
-  query = build_query(keywords)
-  explanation = search_wikipedia(query)
-  card = {"front": text, "back": explanation}
-  return {
-    'text': text,
-    'keywords': keywords,
-    'query': query,
-    'explanation': explanation,
-    'card': card,
-    'deck': [card],
-  }
+  try:
+    data = await file.read()
+    
+    # Validate file is not empty
+    if not data:
+      return JSONResponse(
+        status_code=400,
+        content={"error": "File is empty"}
+      )
+    
+    # Extract text with error handling
+    try:
+      text = extract_text_from_bytes(data)
+    except Exception as e:
+      return JSONResponse(
+        status_code=500,
+        content={"error": f"OCR failed: {str(e)}"}
+      )
+    
+    if not text:
+      return JSONResponse(
+        status_code=400,
+        content={"error": "No text found in image"}
+      )
+    
+    # Extract keywords
+    try:
+      keywords = extract_keywords(text)
+    except Exception as e:
+      keywords = []
+    
+    # Build query and search
+    query = build_query(keywords)
+    try:
+      explanation = search_wikipedia(query)
+    except Exception as e:
+      explanation = f"Could not retrieve explanation: {str(e)}"
+    
+    card = {"front": text, "back": explanation}
+    return {
+      'text': text,
+      'keywords': keywords,
+      'query': query,
+      'explanation': explanation,
+      'card': card,
+      'deck': [card],
+    }
+  except Exception as e:
+    return JSONResponse(
+      status_code=500,
+      content={"error": f"Server error: {str(e)}"}
+    )
 
 # Download CSV for a deck (POST with JSON array of cards)
 from fastapi import Request
