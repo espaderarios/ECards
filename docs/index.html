@@ -43,7 +43,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #c3f0f0 0%, #a8e6e1 100%);
       color: #1a1a1a;
       overflow-x: hidden;
       height: 100%;
@@ -76,8 +76,8 @@
       margin: 0 0 8px 0;
       font-size: 28px;
       font-weight: 700;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      color: #1ba098;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .tabs {
@@ -95,13 +95,13 @@
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
-      background: rgba(255,255,255,0.2);
-      color: white;
+      background: rgba(255,255,255,0.3);
+      color: #2d5f5b;
     }
 
     .tab.active {
       background: white;
-      color: #667eea;
+      color: #1ba098;
     }
 
     .tab:active {
@@ -112,12 +112,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255,255,255,0.15);
+      background: rgba(27, 160, 152, 0.15);
       backdrop-filter: blur(10px);
       border-radius: 12px;
       padding: 12px 16px;
       margin-bottom: 16px;
-      color: white;
+      color: #2d5f5b;
     }
 
     .deck-name {
@@ -207,7 +207,7 @@
 
     .btn-flip {
       background: rgba(255,255,255,0.95);
-      color: #667eea;
+      color: #1ba098;
     }
 
     .btn-flip:active {
@@ -235,26 +235,26 @@
       padding: 14px;
       font-size: 15px;
       font-weight: 600;
-      border: 2px solid rgba(255,255,255,0.3);
+      border: 2px solid rgba(27, 160, 152, 0.4);
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
       background: transparent;
-      color: white;
+      color: #2d5f5b;
     }
 
     .mark-buttons button:active {
-      background: rgba(255,255,255,0.2);
+      background: rgba(27, 160, 152, 0.2);
       transform: scale(0.98);
     }
 
     .stats {
-      background: rgba(255,255,255,0.15);
+      background: rgba(27, 160, 152, 0.15);
       backdrop-filter: blur(10px);
       border-radius: 12px;
       padding: 12px 16px;
       text-align: center;
-      color: white;
+      color: #2d5f5b;
       font-size: 14px;
       margin-bottom: 16px;
     }
@@ -266,16 +266,17 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: white;
+      background: #1ba098;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
       z-index: 1000;
       transition: transform 0.2s;
+      color: white;
     }
 
     .menu-toggle:active {
@@ -376,7 +377,7 @@
     .drawer-section input:focus,
     .drawer-section textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #1ba098;
     }
 
     .button-group {
@@ -396,13 +397,13 @@
     }
 
     .btn-primary {
-      background: #667eea;
+      background: #1ba098;
       color: white;
       flex: 1;
     }
 
     .btn-primary:active {
-      background: #5568d3;
+      background: #158f86;
     }
 
     .btn-secondary {
@@ -417,13 +418,13 @@
 
     .btn-ghost {
       background: transparent;
-      color: #667eea;
-      border: 2px solid #667eea;
+      color: #1ba098;
+      border: 2px solid #1ba098;
       flex: 1;
     }
 
     .btn-ghost:active {
-      background: rgba(102, 126, 234, 0.1);
+      background: rgba(27, 160, 152, 0.1);
     }
 
     .helper-text {
@@ -433,12 +434,12 @@
     }
 
     .ocr-box {
-      background: rgba(255,255,255,0.15);
+      background: rgba(27, 160, 152, 0.15);
       backdrop-filter: blur(10px);
       padding: 16px;
       border-radius: 12px;
       margin-bottom: 16px;
-      color: white;
+      color: #2d5f5b;
     }
 
     .ocr-box label {
@@ -452,16 +453,16 @@
     .ocr-box textarea {
       width: 100%;
       padding: 12px;
-      border: 2px solid rgba(255,255,255,0.3);
+      border: 2px solid rgba(27, 160, 152, 0.3);
       border-radius: 8px;
       font-size: 15px;
       font-family: inherit;
-      background: rgba(255,255,255,0.1);
-      color: white;
+      background: rgba(255,255,255,0.8);
+      color: #2d5f5b;
     }
 
     .ocr-box input[type="file"]::file-selector-button {
-      background: rgba(255,255,255,0.2);
+      background: #1ba098;
       color: white;
       border: none;
       padding: 8px 16px;
@@ -474,8 +475,8 @@
     .ocr-box input:focus,
     .ocr-box textarea:focus {
       outline: none;
-      border-color: rgba(255,255,255,0.6);
-      background: rgba(255,255,255,0.15);
+      border-color: #1ba098;
+      background: rgba(255,255,255,0.95);
     }
 
     .ocr-box textarea {
@@ -491,11 +492,11 @@
     }
 
     .ocr-status {
-      background: rgba(255,255,255,0.2);
+      background: rgba(27, 160, 152, 0.2);
       border-radius: 8px;
       padding: 12px;
       text-align: center;
-      color: white;
+      color: #2d5f5b;
       font-size: 14px;
       margin-bottom: 12px;
       display: none;
@@ -562,13 +563,13 @@
     }
 
     .quiz-option:hover {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.05);
+      border-color: #1ba098;
+      background: rgba(27, 160, 152, 0.05);
     }
 
     .quiz-option.selected {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.1);
+      border-color: #1ba098;
+      background: rgba(27, 160, 152, 0.1);
     }
 
     .quiz-option.correct {
@@ -615,7 +616,7 @@
     .footer {
       text-align: center;
       padding: 16px 0;
-      color: rgba(255,255,255,0.8);
+      color: rgba(45, 95, 91, 0.8);
       font-size: 13px;
     }
 
@@ -773,17 +774,17 @@
      </div>
     </div>
     <div class="quiz-feedback" id="quizFeedback" style="display: none;"></div>
-    <div class="quiz-controls"><button class="btn-primary" id="nextQuizBtn" style="display: none; width: 100%; padding: 16px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; background: white; color: #667eea;">Next Question</button>
+    <div class="quiz-controls"><button class="btn-primary" id="nextQuizBtn" style="display: none; width: 100%; padding: 16px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; background: white; color: #1ba098;">Next Question</button>
     </div>
     <div class="quiz-results" id="quizResults" style="display: none;">
      <div style="text-align: center; background: white; border-radius: 20px; padding: 32px; margin-bottom: 16px;">
       <h2 style="margin: 0 0 16px 0; font-size: 24px; color: #1a1a1a;">Quiz Complete!</h2>
-      <div id="quizScore" style="font-size: 48px; font-weight: 700; color: #667eea; margin-bottom: 8px;">
+      <div id="quizScore" style="font-size: 48px; font-weight: 700; color: #1ba098; margin-bottom: 8px;">
        0/0
       </div>
       <div id="quizPercent" style="font-size: 18px; color: #666; margin-bottom: 24px;">
        0%
-      </div><button id="restartQuiz" style="padding: 16px 32px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; background: #667eea; color: white;">Restart Quiz</button>
+      </div><button id="restartQuiz" style="padding: 16px 32px; font-size: 16px; font-weight: 600; border: none; border-radius: 12px; cursor: pointer; background: #1ba098; color: white;">Restart Quiz</button>
      </div>
     </div>
    </div>
