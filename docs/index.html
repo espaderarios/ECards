@@ -1335,7 +1335,7 @@ function setTab(tab) {
           file,
           'eng',
           {
-            corePath: './tesseract-core.wasm',
+            corePath: './tesseract-core-simd-lstm.wasm.js',
             workerPath: './worker.min.js',
             logger: m => {
               if (m.status === 'recognizing') {
