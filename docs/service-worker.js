@@ -1,9 +1,12 @@
-const CACHE_NAME = "flashcards-v1";
+const CACHE_NAME = "flashcards-v2";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./tailwindcss.js"
+  "./tailwindcss.js",
+  "./tesseract.min.js",
+  "./worker.min.js",
+  "./tesseract-core.wasm"
 ];
 
 self.addEventListener("install", (event) => {
